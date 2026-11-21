@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Lexi Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <main>
+    <header>
+      <img src="../../icons/icon48.png" alt="" width="36" height="36">
+      <h1>Lexi Settings</h1>
+      <span id="saved" class="saved">Saved ✓</span>
+    </header>
+
+    <section>
+      <h2>How to open the bubble</h2>
+      <label class="row"><input type="radio" name="trigger" value="dblclick"> Double-click a word</label>
+      <label class="row"><input type="radio" name="trigger" value="select"> Select any text</label>
+      <label class="row">
+        <input type="radio" name="trigger" value="modifier"> Select text while holding
+        <select id="modifier">
+          <option value="alt">Alt</option>
+          <option value="ctrl">Ctrl / ⌘</option>
+          <option value="shift">Shift</option>
+        </select>
+      </label>
+      <p class="hint">You can also right-click a selection → “Look up”, or press the keyboard shortcut (default
+        <kbd>Alt</kbd>+<kbd>D</kbd>, change it at <code>chrome://extensions/shortcuts</code>).</p>
+      <label class="row"><input type="checkbox" id="ignoreEditable"> Don’t open while typing in text fields</label>
+    </section>
+
+    <section>
+      <h2>Sources</h2>
+      <p class="hint">Tick the sources to show as tabs. Use the arrows to change their order; the first one opens by default.</p>
+      <ul id="sources"></ul>
+    </section>
+
+    <section>
+      <h2>Languages</h2>
+      <label class="row">Translate into <select id="targetLang"></select></label>
+      <label class="row">Wikipedia language <select id="wikiLang"></select></label>
+    </section>
+
+    <section>
+      <h2>Appearance</h2>
+      <label class="row">Theme
+        <select id="theme">
+          <option value="auto">Match system</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </label>
+      <label class="row">Text size <input type="range" id="fontSize" min="12" max="20" step="1"> <span id="fontSizeVal"></span></label>
+      <label class="row">Definitions per part of speech <input type="number" id="maxDefinitions" min="1" max="10"></label>
+    </section>
+
+    <section>
+      <h2>Disabled sites</h2>
+      <p class="hint">One hostname per line (for example <code>docs.google.com</code>). You can also toggle a site from the toolbar popup.</p>
+      <textarea id="disabledSites" rows="4" spellcheck="false"></textarea>
+    </section>
+
+    <section>
+      <h2>History</h2>
+      <label class="row"><input type="checkbox" id="saveHistory"> Save lookup history (stored only in this browser)</label>
+      <div class="history-actions">
+        <button id="exportHistory">Export CSV</button>
+        <button id="clearHistory" class="danger">Clear history</button>
+      </div>
+      <ol id="history"></ol>
+    </section>
+  </main>
+
+  <script src="../shared/defaults.js"></script>
+  <script src="../shared/render.js"></script>
+  <script type="module" src="options.js"></script>
+</body>
+</html>

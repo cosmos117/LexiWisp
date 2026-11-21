@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Lexi</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <img src="../../icons/icon32.png" alt="" width="22" height="22">
+    <strong>Lexi</strong>
+    <span class="spacer"></span>
+    <button id="settings" class="link" title="Settings">⚙ Settings</button>
+  </header>
+
+  <form id="search" autocomplete="off">
+    <input id="q" type="search" placeholder="Look up a word or translate text…" autofocus>
+    <button type="submit">Go</button>
+  </form>
+
+  <div id="result" hidden></div>
+
+  <section id="recent" hidden>
+    <h2>Recent</h2>
+    <div id="recent-list"></div>
+  </section>
+
+  <footer id="site-row" hidden>
+    <label><input type="checkbox" id="site-enabled"> Enabled on <span id="site-host"></span></label>
+  </footer>
+
+  <script src="../shared/defaults.js"></script>
+  <script src="../shared/render.js"></script>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

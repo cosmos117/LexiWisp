@@ -1,0 +1,47 @@
+{
+  "manifest_version": 3,
+  "name": "Lexi - Popup Dictionary & Translator",
+  "short_name": "Lexi",
+  "version": "1.0.0",
+  "description": "Select or double-click any word to get definitions, translations and Wikipedia summaries in a bubble right on the page.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "Lexi - look something up",
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png"
+    }
+  },
+  "options_page": "src/options/options.html",
+  "background": {
+    "service_worker": "src/background.js",
+    "type": "module"
+  },
+  "permissions": ["storage", "contextMenus", "scripting"],
+  "host_permissions": [
+    "https://api.dictionaryapi.dev/*",
+    "https://translate.googleapis.com/*",
+    "https://*.wikipedia.org/*",
+    "https://api.urbandictionary.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/shared/defaults.js", "src/shared/render.js", "src/content/content.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "commands": {
+    "lookup-selection": {
+      "suggested_key": { "default": "Alt+D" },
+      "description": "Look up the selected text"
+    }
+  }
+}
