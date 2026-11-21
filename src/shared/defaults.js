@@ -28,6 +28,16 @@
     { code: 'ur', name: 'Urdu' }, { code: 'vi', name: 'Vietnamese' },
   ];
 
+  // Font choices for the bubble. Stacks use fonts that ship with Windows/macOS, because
+  // web fonts can't be loaded reliably inside other sites' pages (their CSP may block them).
+  globalThis.DEFINER_FONTS = [
+    { id: 'modern', label: 'Modern', stack: '"Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif' },
+    { id: 'classic', label: 'Classic', stack: 'Georgia, "Times New Roman", Times, serif' },
+    { id: 'book', label: 'Book', stack: '"Palatino Linotype", "Book Antiqua", Palatino, "URW Palladio L", serif' },
+    { id: 'friendly', label: 'Friendly', stack: '"Trebuchet MS", "Lucida Grande", "Segoe UI", sans-serif' },
+    { id: 'readable', label: 'Readable', stack: 'Verdana, Tahoma, Geneva, "DejaVu Sans", sans-serif' },
+  ];
+
   globalThis.DEFINER_DEFAULTS = {
     // 'dblclick' | 'select' | 'modifier'
     trigger: 'dblclick',
@@ -38,6 +48,7 @@
     // 'auto' | 'light' | 'dark'
     theme: 'auto',
     fontSize: 14,
+    fontFamily: 'modern', // id from DEFINER_FONTS
     maxDefinitions: 1, // meanings shown per part of speech (the rest sit behind "more meanings")
     sources: [
       { id: 'dictionary', enabled: true },

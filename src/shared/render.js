@@ -179,6 +179,8 @@
         (settings.theme === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
       root.classList.toggle('dc-dark', dark);
       root.style.fontSize = `${settings.fontSize || 14}px`;
+      const font = globalThis.DEFINER_FONTS?.find((f) => f.id === settings.fontFamily);
+      root.style.fontFamily = font ? font.stack : '';
     }
 
     // Header: the looked-up text, plus pronunciation when the dictionary knows the word.
@@ -277,10 +279,12 @@
       },
       setText(t, preferredSource) {
         text = t;
-        try {
-          chrome.runtime.sendMessage({ type: 'history', text: t }).catch(() => {});
-        } catch {
-          /* extension context gone */
+        if (!opts.noHistory) {
+          try {
+            chrome.runtime.sendMessage({ type: 'history', text: t }).catch(() => {});
+          } catch {
+            /* extension context gone */
+          }
         }
         applyTheme();
         renderHeader();

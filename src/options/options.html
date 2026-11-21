@@ -2,76 +2,134 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>LexiWisp Settings</title>
   <link rel="stylesheet" href="options.css">
 </head>
 <body>
-  <main>
-    <header>
-      <img src="../../assets/logo.svg" alt="" width="38" height="38">
-      <h1>LexiWisp Settings</h1>
-      <span id="saved" class="saved">Saved ✓</span>
-    </header>
+  <div class="layout">
+    <!-- Sidebar ------------------------------------------------------------>
+    <aside class="sidebar">
+      <a class="brand" href="#trigger">
+        <img src="../../assets/logo.svg" alt="" width="30" height="30">
+        <span>lexi<b>wisp</b></span>
+      </a>
+      <nav id="nav">
+        <a href="#trigger" data-icon="pointer">Trigger</a>
+        <a href="#sources" data-icon="layers">Sources</a>
+        <a href="#languages" data-icon="languages">Languages</a>
+        <a href="#appearance" data-icon="palette">Appearance</a>
+        <a href="#history" data-icon="history">History</a>
+      </nav>
+      <div class="status" id="status" aria-live="polite"><span data-icon="check"></span> Saved</div>
+      <div class="version" id="version"></div>
+    </aside>
 
-    <section>
-      <h2>How to open the bubble</h2>
-      <label class="row"><input type="radio" name="trigger" value="dblclick"> Double-click a word</label>
-      <label class="row"><input type="radio" name="trigger" value="select"> Select any text</label>
-      <label class="row">
-        <input type="radio" name="trigger" value="modifier"> Select text while holding
-        <select id="modifier">
-          <option value="alt">Alt</option>
-          <option value="ctrl">Ctrl / ⌘</option>
-          <option value="shift">Shift</option>
-        </select>
-      </label>
-      <p class="hint">You can also right-click a selection → “Look up”, or press the keyboard shortcut (default
-        <kbd>Alt</kbd>+<kbd>D</kbd>, change it at <code>chrome://extensions/shortcuts</code>).</p>
-      <label class="row"><input type="checkbox" id="ignoreEditable"> Don’t open while typing in text fields</label>
-    </section>
+    <!-- Content ------------------------------------------------------------>
+    <main>
+      <section class="card" id="trigger">
+        <header class="card-head">
+          <span class="badge" data-icon="pointer"></span>
+          <div><h2>How to open the bubble</h2><p>Pick what feels natural while reading.</p></div>
+        </header>
+        <div class="tiles tiles-3" role="radiogroup" aria-label="Trigger">
+          <button class="tile" role="radio" data-trigger="dblclick"><span data-icon="dblclick"></span>Double-click</button>
+          <button class="tile" role="radio" data-trigger="select"><span data-icon="textcursor"></span>Select text</button>
+          <button class="tile" role="radio" data-trigger="modifier"><span data-icon="keyboard"></span><span>Select + <span id="modLabel">Alt</span></span></button>
+        </div>
+        <div class="row" id="modifierRow" hidden>
+          <div class="row-text"><strong>Key to hold</strong><span>Hold this key while selecting text.</span></div>
+          <div class="segmented" role="radiogroup" aria-label="Modifier key">
+            <button role="radio" data-mod="alt">Alt</button><button role="radio" data-mod="ctrl">Ctrl / ⌘</button><button role="radio" data-mod="shift">Shift</button>
+          </div>
+        </div>
+        <label class="row">
+          <div class="row-text"><strong>Don’t open while typing</strong><span>Ignore selections inside text boxes and editors.</span></div>
+          <input type="checkbox" class="switch" id="ignoreEditable">
+        </label>
+        <div class="row">
+          <div class="row-text"><strong>Keyboard shortcut</strong><span>Look up the selected text from anywhere on the page.</span></div>
+          <div class="shortcut"><kbd id="shortcutKeys">Alt+D</kbd><button class="btn-ghost" id="editShortcut">Change</button></div>
+        </div>
+      </section>
 
-    <section>
-      <h2>Sources</h2>
-      <p class="hint">Tick the sources to show as tabs. Use the arrows to change their order; the first one opens by default.</p>
-      <ul id="sources"></ul>
-    </section>
+      <section class="card" id="sources">
+        <header class="card-head">
+          <span class="badge" data-icon="layers"></span>
+          <div><h2>Sources</h2><p>Drag to reorder. The first one opens by default.</p></div>
+        </header>
+        <ul class="sources" id="sourceList"></ul>
+      </section>
 
-    <section>
-      <h2>Languages</h2>
-      <label class="row">Translate into <select id="targetLang"></select></label>
-      <label class="row">Wikipedia language <select id="wikiLang"></select></label>
-    </section>
+      <section class="card" id="languages">
+        <header class="card-head">
+          <span class="badge" data-icon="languages"></span>
+          <div><h2>Languages</h2><p>Where translations and Wikipedia summaries come from.</p></div>
+        </header>
+        <label class="row">
+          <div class="row-text"><strong>Translate into</strong><span>Selected text is translated to this language.</span></div>
+          <select id="targetLang" class="select"></select>
+        </label>
+        <label class="row">
+          <div class="row-text"><strong>Wikipedia language</strong><span>Which Wikipedia to read summaries from.</span></div>
+          <select id="wikiLang" class="select"></select>
+        </label>
+      </section>
 
-    <section>
-      <h2>Appearance</h2>
-      <label class="row">Theme
-        <select id="theme">
-          <option value="auto">Match system</option>
-          <option value="light">Light</option>
-          <option value="dark">Dark</option>
-        </select>
-      </label>
-      <label class="row">Text size <input type="range" id="fontSize" min="12" max="20" step="1"> <span id="fontSizeVal"></span></label>
-      <label class="row">Meanings shown per part of speech <input type="number" id="maxDefinitions" min="1" max="10"> <span class="hint">(the rest open with “more meanings”)</span></label>
-    </section>
+      <section class="card" id="appearance">
+        <header class="card-head">
+          <span class="badge" data-icon="palette"></span>
+          <div><h2>Appearance</h2><p>Changes show in the preview right away.</p></div>
+        </header>
 
-    <section>
-      <h2>Disabled sites</h2>
-      <p class="hint">One hostname per line (for example <code>docs.google.com</code>). You can also toggle a site from the toolbar popup.</p>
-      <textarea id="disabledSites" rows="4" spellcheck="false"></textarea>
-    </section>
+        <h3 class="label">Theme</h3>
+        <div class="tiles tiles-3" role="radiogroup" aria-label="Theme">
+          <button class="tile theme-tile" role="radio" data-theme-opt="light"><span class="swatch swatch-light"><i></i><i></i></span>Light</button>
+          <button class="tile theme-tile" role="radio" data-theme-opt="dark"><span class="swatch swatch-dark"><i></i><i></i></span>Dark</button>
+          <button class="tile theme-tile" role="radio" data-theme-opt="auto"><span class="swatch swatch-auto"><i></i><i></i></span>Match system</button>
+        </div>
 
-    <section>
-      <h2>History</h2>
-      <p class="hint">The English dictionary is built into LexiWisp and works offline. Translate, Wikipedia and Urban look things up online.</p>
-      <label class="row"><input type="checkbox" id="saveHistory"> Save lookup history (stored only in this browser)</label>
-      <div class="history-actions">
-        <button id="exportHistory">Export CSV</button>
-        <button id="clearHistory" class="danger">Clear history</button>
-      </div>
-      <ol id="history"></ol>
-    </section>
-  </main>
+        <h3 class="label">Font</h3>
+        <div class="tiles tiles-5" role="radiogroup" aria-label="Font" id="fontTiles"></div>
+
+        <div class="row spaced">
+          <div class="row-text"><strong>Text size</strong><span>Size of text in the bubble.</span></div>
+          <div class="range"><input type="range" id="fontSize" min="12" max="20" step="1" aria-label="Text size"><output id="fontSizeVal"></output></div>
+        </div>
+        <div class="row">
+          <div class="row-text"><strong>Meanings shown</strong><span>Per part of speech. The rest open with “more meanings”.</span></div>
+          <div class="stepper">
+            <button id="defMinus" aria-label="Fewer meanings">−</button><output id="maxDefinitions"></output><button id="defPlus" aria-label="More meanings">+</button>
+          </div>
+        </div>
+
+        <h3 class="label">Preview</h3>
+        <div class="preview" id="preview"></div>
+      </section>
+
+      <section class="card" id="history">
+        <header class="card-head">
+          <span class="badge" data-icon="history"></span>
+          <div><h2>History</h2><p>Stored only in this browser. Never uploaded.</p></div>
+          <div class="head-actions">
+            <button class="btn-ghost" id="exportHistory"><span data-icon="download"></span>Export CSV</button>
+            <button class="btn-ghost danger" id="clearHistory"><span data-icon="trash"></span>Clear</button>
+          </div>
+        </header>
+        <label class="row">
+          <div class="row-text"><strong>Save lookup history</strong><span>Shows recent words in the toolbar popup.</span></div>
+          <input type="checkbox" class="switch" id="saveHistory">
+        </label>
+        <ul class="history" id="historyList"></ul>
+        <p class="empty" id="historyEmpty" hidden>No lookups yet. Double-click a word on any page to get started.</p>
+      </section>
+
+      <footer class="foot">
+        The English dictionary is built in and works offline (WordNet 3.1 · CMU Pronouncing Dictionary).
+        Translate, Wikipedia and Urban look things up online.
+      </footer>
+    </main>
+  </div>
 
   <script src="../shared/defaults.js"></script>
   <script src="../shared/render.js"></script>
