@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Lexi - Popup Dictionary & Translator",
-  "short_name": "Lexi",
-  "version": "1.0.0",
-  "description": "Select or double-click any word to get definitions, translations and Wikipedia summaries in a bubble right on the page.",
+  "name": "LexiWisp - Popup Dictionary & Translator",
+  "short_name": "LexiWisp",
+  "version": "1.1.0",
+  "description": "Double-click any word for an instant, simple meaning — plus translations and Wikipedia — in a bubble right on the page. Works offline.",
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",
@@ -11,7 +11,7 @@
     "128": "icons/icon128.png"
   },
   "action": {
-    "default_title": "Lexi - look something up",
+    "default_title": "LexiWisp - look something up",
     "default_popup": "src/popup/popup.html",
     "default_icon": {
       "16": "icons/icon16.png",

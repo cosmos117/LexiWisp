@@ -2,10 +2,10 @@
 (() => {
   // When the extension is reloaded, the old copy of this script stays in open
   // tabs but can no longer reach the extension. Tear it down before starting.
-  window.__lexiTeardown?.();
+  window.__lexiwispTeardown?.();
   const lifetime = new AbortController();
   const signal = lifetime.signal;
-  window.__lexiTeardown = () => {
+  window.__lexiwispTeardown = () => {
     lifetime.abort();
     host?.remove();
   };
@@ -34,7 +34,7 @@
 
   function ensureHost() {
     if (!host) {
-      host = document.createElement('lexi-popup-root');
+      host = document.createElement('lexiwisp-root');
       host.style.cssText =
         'all:initial;position:absolute;top:0;left:0;width:0;height:0;z-index:2147483647;';
       const shadow = host.attachShadow({ mode: 'closed' });
@@ -44,6 +44,7 @@
       panel = DefinerUI.createPanel(shadow, {
         settings,
         className: 'dc-bubble',
+        showLogo: true,
         onClose: hide,
         onRender: position,
       });

@@ -1,15 +1,15 @@
 :root {
-  --bg: #ffffff; --fg: #1f2328; --muted: #656d76; --border: #e1e4e8;
-  --accent: #6d4aff; --chip: #f1edff; --chip-fg: #4b2fd6; --input: #f6f7f9;
+  --bg: #ffffff; --fg: #2b1712; --muted: #8a5b4a; --border: #f3ddd3;
+  --accent: #e8613c; --chip: #fde3d9; --chip-fg: #a3432a; --input: #fdf3ef;
 }
 body.dark {
-  --bg: #1d1e23; --fg: #e8e8ea; --muted: #9da3ab; --border: #34353d;
-  --accent: #a08cff; --chip: #2d2944; --chip-fg: #c9bdff; --input: #26272d;
+  --bg: #241713; --fg: #f7ece6; --muted: #c79e8c; --border: #4a3128;
+  --accent: #f0714a; --chip: #3e221b; --chip-fg: #f3b9a4; --input: #2f1f1a;
 }
 * { box-sizing: border-box; }
 body {
   width: 400px; margin: 0; background: var(--bg); color: var(--fg);
-  font: 14px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font: 14px/1.5 "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
 }
 header { display: flex; align-items: center; gap: 8px; padding: 10px 14px 6px; }
 header strong { font-size: 15px; }
@@ -29,6 +29,7 @@ form button {
 }
 
 #result { border-top: 1px solid var(--border); }
+#result .dc-header { padding-top: 10px; }
 #result .dc-body { max-height: 400px; }
 
 #recent { padding: 4px 14px 12px; }

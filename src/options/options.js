@@ -83,7 +83,7 @@ $('fontSize').addEventListener('input', (e) => ($('fontSizeVal').textContent = `
 $('fontSize').addEventListener('change', (e) => save({ fontSize: Number(e.target.value) }));
 $('maxDefinitions').value = settings.maxDefinitions;
 $('maxDefinitions').addEventListener('change', (e) => {
-  const n = Math.min(10, Math.max(1, Number(e.target.value) || 3));
+  const n = Math.min(10, Math.max(1, Number(e.target.value) || 1));
   e.target.value = n;
   save({ maxDefinitions: n });
 });
@@ -128,7 +128,7 @@ $('exportHistory').addEventListener('click', async () => {
   const csv = ['text,date', ...history.map((h) => `"${h.text.replace(/"/g, '""')}",${new Date(h.t).toISOString()}`)].join('\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-  a.download = 'lexi-history.csv';
+  a.download = 'lexiwisp-history.csv';
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 });

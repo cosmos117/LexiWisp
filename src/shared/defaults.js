@@ -38,7 +38,7 @@
     // 'auto' | 'light' | 'dark'
     theme: 'auto',
     fontSize: 14,
-    maxDefinitions: 3,
+    maxDefinitions: 1, // meanings shown per part of speech (the rest sit behind "more meanings")
     sources: [
       { id: 'dictionary', enabled: true },
       { id: 'translate', enabled: true },

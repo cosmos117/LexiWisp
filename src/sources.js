@@ -1,3 +1,5 @@
+import { offlineDefine } from './offline-dictionary.js';
+
 // Lookup sources. Runs in the service worker so requests bypass page CSP/CORS.
 
 class NotFound extends Error {}
@@ -37,13 +39,17 @@ function stripHtml(html) {
     .trim();
 }
 
-// Primary dictionary (Free Dictionary API) + Wiktionary as a hedged backup:
-// the backup starts if the primary is slow or fails, and the first good answer wins.
+// 1. Offline dictionary bundled with the extension (instant, no network).
+// 2. Words it doesn't know: Free Dictionary API, with Wiktionary as a hedged backup —
+//    the backup starts if the primary is slow or fails, and the first good answer wins.
 async function dictionary(text) {
   const word = text.trim().toLowerCase();
   if (wordCount(word) > 4) {
     throw new Error('Select a single word or short phrase to see dictionary definitions.');
   }
+
+  const local = await offlineDefine(word);
+  if (local) return local;
 
   const ctrl = new AbortController();
   let startBackup;

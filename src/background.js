@@ -1,11 +1,14 @@
 import './shared/defaults.js';
 import { lookup } from './sources.js';
 
-const MENU_ID = 'lexi-lookup';
+const MENU_ID = 'lexiwisp-lookup';
 const MAX_HISTORY = 200;
 
-chrome.runtime.onInstalled.addListener(async () => {
-  chrome.contextMenus.create({ id: MENU_ID, title: 'Look up “%s”', contexts: ['selection'] });
+chrome.runtime.onInstalled.addListener(async ({ reason, previousVersion }) => {
+  chrome.storage.local.remove('lookupCache'); // old cache format
+  // 1.1 switched to one simple meaning per part of speech by default.
+  if (reason === 'update' && previousVersion?.startsWith('1.0.')) chrome.storage.sync.set({ maxDefinitions: 1 });
+  chrome.contextMenus.create({ id: MENU_ID, title: 'Look up “%s” with LexiWisp', contexts: ['selection'] });
 
   // Chrome only injects content scripts into pages loaded *after* install/reload.
   // Inject into tabs that are already open so the bubble works without a refresh.
@@ -44,7 +47,7 @@ async function addHistory(text) {
 // ---- lookup cache ------------------------------------------------------------
 // In-flight + recent results live in memory; successful results are also kept in
 // chrome.storage.local so repeat lookups are instant on any page and after restarts.
-const CACHE_KEY = 'lookupCache';
+const CACHE_KEY = 'lookupCache2'; // bumped when result formats change
 const CACHE_MAX = 500;
 const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const inflight = new Map();
@@ -84,8 +87,11 @@ function cachedLookup(source, text, settings) {
     const hit = cache[key];
     if (hit && Date.now() - hit.t < CACHE_TTL_MS) return hit.data;
     const data = await lookup(source, text, settings);
-    cache[key] = { t: Date.now(), data };
-    scheduleSave(cache);
+    if (!data.offline) {
+      // Offline-dictionary results are already instant; only cache network results.
+      cache[key] = { t: Date.now(), data };
+      scheduleSave(cache);
+    }
     return data;
   })();
   inflight.set(key, p);

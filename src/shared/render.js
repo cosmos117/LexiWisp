@@ -19,6 +19,13 @@
   const ICON_CLOSE =
     '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>';
 
+  // LexiWisp logo: rounded-square tile (same artwork as assets/logo.svg and the toolbar icon).
+  const LOGO =
+    '<svg viewBox="0 0 128 128"><rect width="128" height="128" rx="28" fill="#EDBCA4"/><g transform="translate(14 14) scale(0.78)">' +
+    '<path d="M42 16H86A30 30 0 0 1 116 46V62A30 30 0 0 1 86 92H58L30 114L35 89A30 30 0 0 1 12 62V46A30 30 0 0 1 42 16Z" fill="#D2502C"/>' +
+    '<path d="M58 61a6.5 6.5 0 1 1 6.5 6.5 a15 15 0 1 1 15 -15" fill="none" stroke="#F7D9C4" stroke-width="9" stroke-linecap="round"/>' +
+    '<path d="M92 26Q94 35 103 37Q94 39 92 48Q90 39 81 37Q90 35 92 26Z" fill="#F7D9C4"/></g></svg>';
+
   // ---- lookup with per-page cache -------------------------------------------
   const cache = new Map();
   function lookup(source, text, settings) {
@@ -62,33 +69,40 @@
     `<button class="dc-iconbtn" title="Listen" data-speak="${esc(text)}" data-lang="${esc(lang || '')}" data-audio="${esc(audio || '')}">${ICON_SPEAKER}</button>`;
   const more = (url, label) =>
     url ? `<a class="dc-more" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(label)} ↗</a>` : '';
-  const chips = (label, words) =>
+  const chips = (words, label = '') =>
     words?.length
-      ? `<div class="dc-rel"><span class="dc-rel-label">${label}</span>${words
-          .map((w) => `<button class="dc-chip" data-lookup="${esc(w)}">${esc(w)}</button>`)
+      ? `<div class="dc-rel">${label ? `<span class="dc-rel-label">${label}</span>` : ''}${words
+          .map((w) => `<button class="dc-chip" data-lookup="${esc(w)}" title="Look up “${esc(w)}”">${esc(w)}</button>`)
           .join('')}</div>`
       : '';
+  const example = (ex) => (ex ? `<div class="dc-ex">“${esc(ex)}”</div>` : '');
 
   const RENDER = {
+    // One plain meaning per part of speech up front; the rest tucked behind "more meanings".
     dictionary(d, s) {
+      const shown = Math.max(1, s.maxDefinitions || 1);
+      const formOf = d.formOf
+        ? `<div class="dc-meta">Form of <button class="dc-link" data-lookup="${esc(d.formOf)}">${esc(d.formOf)}</button></div>`
+        : '';
       return (
-        `<div class="dc-head"><span class="dc-word">${esc(d.word)}</span>` +
-        (d.phonetic ? `<span class="dc-phon">${esc(d.phonetic)}</span>` : '') +
-        speakBtn(d.word, 'en-US', d.audio) +
-        '</div>' +
+        formOf +
         d.meanings
-          .map(
-            (m) =>
-              `<section class="dc-sec"><div class="dc-pos">${esc(m.partOfSpeech)}</div><ol class="dc-defs">` +
-              m.definitions
-                .slice(0, s.maxDefinitions || 3)
-                .map((x) => `<li>${esc(x.definition)}${x.example ? `<div class="dc-ex">“${esc(x.example)}”</div>` : ''}</li>`)
-                .join('') +
-              '</ol>' +
-              chips('Synonyms', m.synonyms) +
-              chips('Antonyms', m.antonyms) +
+          .map((m) => {
+            const main = m.definitions.slice(0, shown);
+            const rest = m.definitions.slice(shown);
+            return (
+              `<section class="dc-sec"><div class="dc-pos">${esc(m.partOfSpeech)}</div>` +
+              main.map((x) => `<p class="dc-def">${esc(x.definition)}</p>${example(x.example)}`).join('') +
+              (rest.length
+                ? `<details class="dc-moredefs"><summary>${rest.length} more meaning${rest.length > 1 ? 's' : ''}</summary><ol>` +
+                  rest.map((x) => `<li>${esc(x.definition)}${example(x.example)}</li>`).join('') +
+                  '</ol></details>'
+                : '') +
+              chips(m.synonyms) +
+              chips(m.antonyms, 'Opposite') +
               '</section>'
-          )
+            );
+          })
           .join('') +
         more(d.moreUrl, 'More on Wiktionary')
       );
@@ -97,7 +111,7 @@
     translate(d) {
       return (
         `<div class="dc-meta">${esc(langName(d.from))} → ${esc(langName(d.to))}</div>` +
-        `<div class="dc-head"><span class="dc-trans">${esc(d.translation)}</span>${speakBtn(d.translation, d.to)}</div>` +
+        `<div class="dc-row"><span class="dc-trans">${esc(d.translation)}</span>${speakBtn(d.translation, d.to)}</div>` +
         d.alternatives
           .map(
             (a) =>
@@ -110,10 +124,11 @@
       );
     },
 
-    wikipedia(d) {
+    wikipedia(d, _s, text) {
+      const sameTitle = d.title.toLowerCase() === text.toLowerCase();
       return (
         (d.thumbnail ? `<img class="dc-thumb" src="${esc(d.thumbnail)}" alt="">` : '') +
-        `<div class="dc-head"><span class="dc-word">${esc(d.title)}</span></div>` +
+        (sameTitle ? '' : `<div class="dc-subtitle">${esc(d.title)}</div>`) +
         (d.description ? `<div class="dc-meta">${esc(d.description)}</div>` : '') +
         (d.disambiguation ? '<div class="dc-meta">This term may refer to several topics.</div>' : '') +
         `<p class="dc-extract">${esc(d.extract)}</p>` +
@@ -142,13 +157,22 @@
     let text = '';
     let active = null;
     let token = 0;
+    let headAudio = '';
+    let headLang = '';
 
     const root = document.createElement('div');
     root.className = 'dc-root ' + (opts.className || '');
-    root.innerHTML = '<div class="dc-tabs" role="tablist"></div><div class="dc-body"></div>';
+    root.innerHTML =
+      '<div class="dc-header">' +
+      (opts.showLogo ? `<span class="dc-logo" aria-hidden="true">${LOGO}</span>` : '') +
+      '<span class="dc-word"></span><span class="dc-phon"></span><span class="dc-spacer"></span>' +
+      `<button class="dc-iconbtn" data-speak-head title="Listen">${ICON_SPEAKER}</button>` +
+      (opts.onClose ? `<button class="dc-iconbtn" data-close title="Close (Esc)">${ICON_CLOSE}</button>` : '') +
+      '</div><div class="dc-tabs" role="tablist"></div><div class="dc-body"></div>';
     container.appendChild(root);
-    const tabs = root.querySelector('.dc-tabs');
-    const body = root.querySelector('.dc-body');
+    const $ = (sel) => root.querySelector(sel);
+    const tabs = $('.dc-tabs');
+    const body = $('.dc-body');
 
     const enabled = () => settings.sources.filter((s) => s.enabled && LABELS[s.id]).map((s) => s.id);
 
@@ -160,13 +184,29 @@
       root.style.fontSize = `${settings.fontSize || 14}px`;
     }
 
+    // Header: the looked-up text, plus pronunciation when the dictionary knows the word.
+    function renderHeader() {
+      const forText = text;
+      $('.dc-word').textContent = text;
+      $('.dc-word').title = text;
+      $('.dc-phon').textContent = '';
+      headAudio = '';
+      headLang = '';
+      if (text.split(/\s+/).length > 4) return;
+      lookup('dictionary', text, settings)
+        .then((d) => {
+          if (forText !== text) return;
+          $('.dc-phon').textContent = d.phonetic || '';
+          headAudio = d.audio || '';
+          headLang = 'en-US';
+        })
+        .catch(() => {});
+    }
+
     function renderTabs() {
-      tabs.innerHTML =
-        enabled()
-          .map((id) => `<button class="dc-tab" role="tab" data-tab="${id}" aria-selected="${id === active}">${LABELS[id]}</button>`)
-          .join('') +
-        '<span class="dc-spacer"></span>' +
-        (opts.onClose ? `<button class="dc-iconbtn" data-close title="Close (Esc)">${ICON_CLOSE}</button>` : '');
+      tabs.innerHTML = enabled()
+        .map((id) => `<button class="dc-tab" role="tab" data-tab="${id}" aria-selected="${id === active}">${LABELS[id]}</button>`)
+        .join('');
     }
 
     // Long text or non-Latin script → translation is the more useful first tab.
@@ -187,15 +227,24 @@
         opts.onRender?.();
         return;
       }
-      body.innerHTML = '<div class="dc-loading"><span></span><span></span><span></span></div>';
-      opts.onRender?.();
+      // Offline results arrive in a few ms — fade the old result right away, but only
+      // show the spinner if we're actually waiting on the network.
+      body.classList.add('dc-stale');
+      const spinner = setTimeout(() => {
+        if (my !== token) return;
+        body.innerHTML = '<div class="dc-loading"><span></span><span></span><span></span></div>';
+        opts.onRender?.();
+      }, 120);
       try {
         const data = await lookup(id, text, settings);
         if (my !== token) return;
-        body.innerHTML = RENDER[id](data, settings);
+        body.innerHTML = RENDER[id](data, settings, text);
       } catch (e) {
         if (my !== token) return;
         body.innerHTML = `<div class="dc-empty">${esc(e.message)}</div>`;
+      } finally {
+        clearTimeout(spinner);
+        if (my === token) body.classList.remove('dc-stale');
       }
       body.scrollTop = 0;
       opts.onRender?.();
@@ -213,13 +262,16 @@
     }
 
     root.addEventListener('click', (e) => {
-      const t = e.target.closest('[data-tab],[data-close],[data-speak],[data-lookup]');
+      const t = e.target.closest('[data-tab],[data-close],[data-speak],[data-speak-head],[data-lookup]');
       if (!t) return;
       if (t.dataset.tab) show(t.dataset.tab);
       else if (t.hasAttribute('data-close')) opts.onClose?.();
+      else if (t.hasAttribute('data-speak-head')) speak(text, headLang, headAudio);
       else if (t.hasAttribute('data-speak')) speak(t.dataset.speak, t.dataset.lang, t.dataset.audio);
       else if (t.dataset.lookup) api.setText(t.dataset.lookup, active);
     });
+    // Opening "more meanings" changes the bubble's height; let the host re-position it.
+    root.addEventListener('toggle', () => opts.onRender?.(), true);
 
     const api = {
       root,
@@ -234,12 +286,16 @@
           /* extension context gone */
         }
         applyTheme();
+        renderHeader();
         show(preferredSource && enabled().includes(preferredSource) ? preferredSource : pickDefault(t));
       },
       setSettings(s) {
         settings = s;
         applyTheme();
-        if (text) show(enabled().includes(active) ? active : pickDefault(text));
+        if (text) {
+          renderHeader();
+          show(enabled().includes(active) ? active : pickDefault(text));
+        }
       },
     };
 
@@ -248,58 +304,76 @@
   }
 
   // ---- styles --------------------------------------------------------------------
+  // LexiWisp palette: warm coral accent with peach + honey chips.
   const CSS = `
 .dc-root{
-  --bg:#ffffff;--fg:#1f2328;--muted:#656d76;--border:#e1e4e8;--accent:#6d4aff;
-  --chip:#f1edff;--chip-fg:#4b2fd6;--hover:#f4f5f7;--shadow:0 10px 30px rgba(15,15,30,.18),0 2px 6px rgba(15,15,30,.08);
-  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --bg:#ffffff;--fg:#2b1712;--muted:#8a5b4a;--soft:#a07a6c;--border:#f3ddd3;--accent:#e8613c;
+  --chip:#fde3d9;--chip-fg:#a3432a;--chip2:#fef2cc;--chip2-fg:#7a5a10;--hover:#fdf1ec;
+  --shadow:0 12px 32px rgba(90,40,20,.16),0 2px 6px rgba(90,40,20,.08);
+  font-family:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
   font-size:14px;line-height:1.5;color:var(--fg);background:var(--bg);text-align:left;
   letter-spacing:normal;word-spacing:normal;text-transform:none;font-weight:400;font-style:normal;
 }
 .dc-root.dc-dark{
-  --bg:#1d1e23;--fg:#e8e8ea;--muted:#9da3ab;--border:#34353d;--accent:#a08cff;
-  --chip:#2d2944;--chip-fg:#c9bdff;--hover:#2a2b31;--shadow:0 10px 30px rgba(0,0,0,.5);
+  --bg:#241713;--fg:#f7ece6;--muted:#c79e8c;--soft:#b48f80;--border:#4a3128;--accent:#f0714a;
+  --chip:#3e221b;--chip-fg:#f3b9a4;--chip2:#3a3116;--chip2-fg:#f2c94c;--hover:#2f1f1a;
+  --shadow:0 12px 32px rgba(0,0,0,.55);
 }
 .dc-root *,.dc-root *::before,.dc-root *::after{box-sizing:border-box}
 .dc-bubble{
-  position:absolute;width:380px;max-width:calc(100vw - 16px);border:1px solid var(--border);
-  border-radius:12px;box-shadow:var(--shadow);overflow:hidden;animation:dc-in .12s ease-out;
+  position:absolute;width:390px;max-width:calc(100vw - 16px);border:1px solid var(--border);
+  border-radius:16px;box-shadow:var(--shadow);overflow:hidden;animation:dc-in .12s ease-out;
 }
 @keyframes dc-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
-.dc-tabs{display:flex;align-items:center;gap:2px;padding:6px 6px 0;border-bottom:1px solid var(--border)}
-.dc-tab{
-  all:unset;cursor:pointer;padding:6px 10px 7px;font-size:.88em;font-weight:600;color:var(--muted);
-  border-bottom:2px solid transparent;border-radius:6px 6px 0 0;
-}
-.dc-tab:hover{background:var(--hover);color:var(--fg)}
-.dc-tab[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+.dc-header{display:flex;align-items:center;gap:10px;padding:14px 10px 4px 16px;min-width:0}
+.dc-logo{flex:none;width:30px;height:30px;display:inline-flex}
+.dc-logo svg{width:100%;height:100%}
+.dc-word{font-size:1.4em;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 1 auto}
+.dc-phon{color:var(--muted);white-space:nowrap;font-family:"Segoe UI","Lucida Sans Unicode",sans-serif;flex:none}
 .dc-spacer{flex:1}
+.dc-tabs{display:flex;gap:4px;padding:0 10px;overflow-x:auto;scrollbar-width:none}
+.dc-tab{
+  all:unset;cursor:pointer;padding:6px 8px 7px;font-size:.98em;color:var(--muted);
+  border-bottom:2px solid transparent;white-space:nowrap;
+}
+.dc-tab:hover{color:var(--fg)}
+.dc-tab[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
 .dc-iconbtn{
   all:unset;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;
-  width:28px;height:28px;border-radius:50%;color:var(--muted);flex:none;
+  width:30px;height:30px;border-radius:50%;color:var(--muted);flex:none;
 }
 .dc-iconbtn:hover{background:var(--hover);color:var(--accent)}
-.dc-body{padding:12px 14px 14px;max-height:360px;overflow:auto;overscroll-behavior:contain}
-.dc-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.dc-word{font-size:1.35em;font-weight:700}
+.dc-body{padding:6px 16px 16px;max-height:340px;overflow:auto;overscroll-behavior:contain}
+.dc-stale>*{opacity:.35;transition:opacity .1s .03s}
+.dc-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .dc-trans{font-size:1.2em;font-weight:600}
-.dc-phon{color:var(--muted);font-family:"Lucida Sans Unicode","Segoe UI",sans-serif}
-.dc-meta{color:var(--muted);font-size:.86em;margin:2px 0 4px}
+.dc-subtitle{font-size:1.1em;font-weight:700}
+.dc-meta{color:var(--muted);font-size:.88em;margin:6px 0 2px}
+.dc-link{all:unset;cursor:pointer;color:var(--accent);font-weight:600}
+.dc-link:hover{text-decoration:underline}
 .dc-sec{margin-top:10px}
-.dc-pos{font-style:italic;font-weight:600;color:var(--accent);font-size:.9em;margin-bottom:2px}
-.dc-defs{margin:0;padding-left:1.3em}
-.dc-defs li{margin:3px 0}
-.dc-ex{color:var(--muted);font-style:italic;margin-top:2px}
-.dc-rel{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:6px}
-.dc-rel-label{font-size:.8em;color:var(--muted);margin-right:2px}
+.dc-pos{font-style:italic;color:var(--soft);font-size:.95em}
+.dc-def{margin:2px 0 0;font-size:1.08em}
+.dc-ex{color:var(--muted);font-style:italic;margin-top:2px;font-size:.93em}
+.dc-moredefs{margin-top:4px;font-size:.93em}
+.dc-moredefs summary{cursor:pointer;color:var(--muted);list-style:none;user-select:none}
+.dc-moredefs summary::-webkit-details-marker{display:none}
+.dc-moredefs summary::before{content:"+ "}
+.dc-moredefs[open] summary::before{content:"− "}
+.dc-moredefs summary:hover{color:var(--accent)}
+.dc-moredefs ol{margin:4px 0 0;padding-left:1.3em}
+.dc-moredefs li{margin:3px 0}
+.dc-rel{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px}
+.dc-rel-label{font-size:.82em;color:var(--muted)}
 .dc-chip{
-  all:unset;cursor:pointer;font-size:.82em;padding:1px 8px;border-radius:999px;
+  all:unset;cursor:pointer;font-size:.95em;padding:3px 13px;border-radius:999px;
   background:var(--chip);color:var(--chip-fg);
 }
-.dc-chip:hover{filter:brightness(.95);text-decoration:underline}
-.dc-alts{display:flex;flex-wrap:wrap;gap:4px}
-.dc-alt{font-size:.88em;padding:1px 8px;border-radius:6px;background:var(--hover)}
-.dc-thumb{float:right;width:84px;height:84px;object-fit:cover;border-radius:8px;margin:0 0 6px 10px}
+.dc-chip:nth-of-type(3n){background:var(--chip2);color:var(--chip2-fg)}
+.dc-chip:hover{filter:brightness(.96);text-decoration:underline}
+.dc-alts{display:flex;flex-wrap:wrap;gap:6px}
+.dc-alt{font-size:.9em;padding:2px 10px;border-radius:999px;background:var(--chip);color:var(--chip-fg)}
+.dc-thumb{float:right;width:84px;height:84px;object-fit:cover;border-radius:10px;margin:6px 0 6px 10px}
 .dc-extract{margin:6px 0 0;white-space:pre-line}
 .dc-more{
   display:inline-block;margin-top:12px;font-size:.85em;color:var(--accent);text-decoration:none;font-weight:600;clear:both;
@@ -313,5 +387,5 @@
 @keyframes dc-b{0%,80%,100%{opacity:.25;transform:scale(.8)}40%{opacity:1;transform:none}}
 `;
 
-  globalThis.DefinerUI = { createPanel, CSS, LABELS, esc };
+  globalThis.DefinerUI = { createPanel, CSS, LABELS, esc, LOGO };
 })();
