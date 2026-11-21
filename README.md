@@ -10,10 +10,9 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/cosmos117/LexiWisp/releases/latest"><img alt="Download" src="https://img.shields.io/github/v/release/cosmos117/LexiWisp?label=download&color=e8613c"></a>
+  <a href="https://github.com/cosmos117/LexiWisp/releases/latest"><img alt="Download" src="https://img.shields.io/badge/download-latest%20release-e8613c"></a>
   <img alt="Manifest V3" src="https://img.shields.io/badge/Chrome-Manifest%20V3-e8613c">
   <img alt="Works offline" src="https://img.shields.io/badge/dictionary-works%20offline-f58a5e">
-  <img alt="No account" src="https://img.shields.io/badge/no%20account%20%C2%B7%20no%20tracking-2b1712">
   <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/license-MIT-8a5b4a"></a>
 </p>
 
