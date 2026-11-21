@@ -14,6 +14,7 @@
   <img alt="Manifest V3" src="https://img.shields.io/badge/Chrome-Manifest%20V3-e8613c">
   <img alt="Works offline" src="https://img.shields.io/badge/dictionary-works%20offline-f58a5e">
   <img alt="No account" src="https://img.shields.io/badge/no%20account%20%C2%B7%20no%20tracking-2b1712">
+  <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/license-MIT-8a5b4a"></a>
 </p>
 
 <p align="center">
@@ -36,17 +37,15 @@ Then double-click any word on any page. Other Chromium-based browsers, such as E
 
 ## Features
 
-| | |
-|---|---|
-| 📖 **Offline dictionary** | WordNet 3.1 definitions + CMU pronunciations (IPA). Understands word forms: *ran → run*, *children → child*, *happier → happy*. |
-| 🔤 **Related words** | Click a chip to look up a synonym or related word. |
-| 🌍 **Translate** | Translates into 40+ languages, with alternative translations for single words. |
-| 📚 **Wikipedia** | Article summary with thumbnail, in your chosen language. |
-| 💬 **Urban Dictionary** | Optional tab for slang and internet terms. |
-| 🔊 **Pronunciation** | Plays recorded audio when available, otherwise your browser's voice. |
-| 🖱️ **Your trigger** | Double-click, select text, or select while holding Alt / Ctrl / Shift. Also the right-click menu and <kbd>Alt</kbd>+<kbd>D</kbd>. |
-| 🎨 **Make it yours** | Light, dark or system theme · 5 fonts · text size · tab order. |
-| 🕘 **History** | Recent lookups in the toolbar popup, with CSV export. Stored only in your browser. |
+- **Offline dictionary**: WordNet 3.1 definitions and CMU pronunciations (IPA). Understands word forms: *ran → run*, *children → child*, *happier → happy*.
+- **Related words**: click a chip to look up a synonym or related word.
+- **Translate**: translates into 40+ languages, with alternative translations for single words.
+- **Wikipedia**: article summary with thumbnail, in your chosen language.
+- **Urban Dictionary**: optional tab for slang and internet terms.
+- **Pronunciation**: plays recorded audio when available, otherwise your browser's voice.
+- **Your trigger**: double-click, select text, or select while holding Alt / Ctrl / Shift. Also the right-click menu and <kbd>Alt</kbd>+<kbd>D</kbd>.
+- **Make it yours**: light, dark or system theme, 5 fonts, text size and tab order.
+- **History**: recent lookups in the toolbar popup, with CSV export. Stored only in your browser.
 
 ## Screenshots
 
@@ -117,3 +116,7 @@ node tools/build-dictionary.mjs <scratch>/node_modules/wordnet-db <scratch>/node
 - Pronunciations: [CMU Pronouncing Dictionary](http://www.speech.cs.cmu.edu/cgi-bin/cmudict), Carnegie Mellon University
 
 Their license texts are in [`data/dict/LICENSES.txt`](data/dict/LICENSES.txt).
+
+## License
+
+LexiWisp is released under the [MIT License](LICENSE). The bundled dictionary data keeps its own licenses (see Credits).

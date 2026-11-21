@@ -11,7 +11,7 @@ import zlib from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const INCLUDE = ['manifest.json', 'icons', 'assets', 'src', 'data/dict'];
+const INCLUDE = ['manifest.json', 'LICENSE', 'icons', 'assets', 'src', 'data/dict'];
 
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'manifest.json'), 'utf8'));
 const outDir = path.join(root, 'dist');
