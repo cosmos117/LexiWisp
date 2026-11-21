@@ -1,0 +1,10 @@
+# Release builds (attach to GitHub Releases instead of committing)
+dist/
+
+# Tooling
+node_modules/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
