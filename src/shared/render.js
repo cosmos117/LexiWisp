@@ -21,10 +21,7 @@
 
   // LexiWisp logo: rounded-square tile (same artwork as assets/logo.svg and the toolbar icon).
   const LOGO =
-    '<svg viewBox="0 0 128 128"><rect width="128" height="128" rx="28" fill="#EDBCA4"/><g transform="translate(14 14) scale(0.78)">' +
-    '<path d="M42 16H86A30 30 0 0 1 116 46V62A30 30 0 0 1 86 92H58L30 114L35 89A30 30 0 0 1 12 62V46A30 30 0 0 1 42 16Z" fill="#D2502C"/>' +
-    '<path d="M58 61a6.5 6.5 0 1 1 6.5 6.5 a15 15 0 1 1 15 -15" fill="none" stroke="#F7D9C4" stroke-width="9" stroke-linecap="round"/>' +
-    '<path d="M92 26Q94 35 103 37Q94 39 92 48Q90 39 81 37Q90 35 92 26Z" fill="#F7D9C4"/></g></svg>';
+    '<svg viewBox="0 0 128 128"><defs><linearGradient id="lw-bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E4643A"/><stop offset="1" stop-color="#C8461F"/></linearGradient></defs><rect width="128" height="128" rx="30" fill="url(#lw-bg)"/><g transform="translate(-10.75 15)"><path transform="translate(4 -5)" d="M55 70a8.5 8.5 0 1 1 8.5 8.5a20 20 0 1 1 20 -20" fill="none" stroke="#F9DECB" stroke-width="12" stroke-linecap="round"/><path d="M95 18Q97.5 29.5 109 32Q97.5 34.5 95 46Q92.5 34.5 81 32Q92.5 29.5 95 18Z" fill="#F9DECB"/></g></svg>';
 
   // ---- lookup with per-page cache -------------------------------------------
   const cache = new Map();
